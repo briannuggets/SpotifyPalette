@@ -1,0 +1,41 @@
+@import "./mixins";
+@import "https://fonts.googleapis.com/css2?family=Poppins&display=swap";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  overflow-x: hidden;
+}
+
+.App {
+  @include flexCenter();
+  height: 100vh;
+  width: 100vw;
+  a {
+    color: white;
+    background-color: green;
+    font-size: 1.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 3px;
+    text-decoration: none;
+    @include userSelectNone();
+    &:hover {
+      cursor: pointer;
+    }
+    &:active {
+      background-color: lighten(green, 5%);
+    }
+  }
+}
+
+#dashboard {
+  display: flex;
+  div {
+    flex: 1;
+  }
+}
