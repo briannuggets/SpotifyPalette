@@ -3,7 +3,6 @@ import SpotifyWebApi from "spotify-web-api-node";
 import { useEffect, useState, useRef } from "react";
 import { CLIENT_ID, CLIENT_SECRET } from "../config.jsx";
 import Card from "./Card";
-import Player from "./Player";
 import * as Helpers from "../functions/TrackHelper.jsx";
 
 const spotifyApi = new SpotifyWebApi({
@@ -107,8 +106,10 @@ const Dashboard = ({ code }) => {
     }
 
     // Set the next pair of tracks to compare
-    setFirstTrack(trackMap[trackOrder[currentOrder][0]]);
-    setSecondTrack(trackMap[trackOrder[currentOrder][1]]);
+    setTimeout(() => {
+      setFirstTrack(trackMap[trackOrder[currentOrder][0]]);
+      setSecondTrack(trackMap[trackOrder[currentOrder][1]]);
+    }, 200);
     setCurrentOrder(currentOrder + 1);
   };
 
@@ -125,9 +126,53 @@ const Dashboard = ({ code }) => {
   }, [loadedTracks]);
 
   // Play the currently hovered track
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
-  const playTrack = (uri) => {
-    setCurrentlyPlaying(uri);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(false);
+  const audioRef = useRef();
+  const playTrack = (url) => {
+    if (audioRef.current === null) {
+      return;
+    }
+    if (url === null) {
+      audioRef.current.pause();
+      setCurrentlyPlaying(false);
+      return;
+    }
+
+    audioRef.current.volume = 0.3;
+    if (currentlyPlaying) {
+      audioRef.current.pause();
+      audioRef.current.src = url;
+      audioRef.current.play();
+    } else {
+      audioRef.current.src = url;
+      audioRef.current.play();
+      setCurrentlyPlaying(true);
+    }
+  };
+
+  // Trigger mouseleave event on cards to play the next track
+  const musicReset = () => {
+    if (firstCardRef.current === null || secondCardRef.current === null) {
+      return;
+    }
+    firstCardRef.current.classList.add("hidden");
+    secondCardRef.current.classList.add("hidden");
+    setTimeout(() => {
+      firstCardRef.current.style.display = "none";
+      secondCardRef.current.style.display = "none";
+      firstCardRef.current.classList.add("reveal");
+      secondCardRef.current.classList.add("reveal");
+    }, 200);
+    setTimeout(() => {
+      firstCardRef.current.style.display = "flex";
+      secondCardRef.current.style.display = "flex";
+      firstCardRef.current.classList.remove("hidden");
+      secondCardRef.current.classList.remove("hidden");
+    }, 300);
+    setTimeout(() => {
+      firstCardRef.current.classList.remove("reveal");
+      secondCardRef.current.classList.remove("reveal");
+    }, 500);
   };
 
   const backgroundImages = [useRef(), useRef()];
@@ -151,6 +196,7 @@ const Dashboard = ({ code }) => {
           selectTrack={selectTrack}
           containerRef={firstCardRef}
           background={backgroundImages}
+          musicReset={musicReset}
         />
         <Card
           track={secondTrack}
@@ -158,9 +204,10 @@ const Dashboard = ({ code }) => {
           selectTrack={selectTrack}
           containerRef={secondCardRef}
           background={backgroundImages}
+          musicReset={musicReset}
         />
       </div>
-      <Player accessToken={accessToken} trackUri={currentlyPlaying} />
+      <audio ref={audioRef} />
     </>
   );
 };

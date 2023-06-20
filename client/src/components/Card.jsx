@@ -1,9 +1,17 @@
 import { useRef, useEffect, useState } from "react";
 import * as Helpers from "../functions/TrackHelper.jsx";
 
-const Card = ({ track, playTrack, selectTrack, containerRef, background }) => {
+const Card = ({
+  track,
+  playTrack,
+  selectTrack,
+  containerRef,
+  background,
+  musicReset,
+}) => {
   const [playTimeout, setPlayTimeout] = useState(null);
 
+  // Change the background image on card hover
   const changeBackground = () => {
     if (background[0].current === null || background[1].current === null) {
       return;
@@ -31,29 +39,19 @@ const Card = ({ track, playTrack, selectTrack, containerRef, background }) => {
       setPlayTimeout(
         setTimeout(() => {
           // Play the track after a delay
-          playTrack(Helpers.trackGetUri(track));
-        }, 600)
+          playTrack(Helpers.trackGetPreview(track));
+        }, 500)
       );
     }
 
     changeBackground();
-
-    // Initial rotation of the card
-    const rect = containerRef.current.getBoundingClientRect();
-    const offsetX = (e.clientX - (rect.left + rect.width / 2)) / rect.width;
-    const offsetY = (e.clientY - (rect.top + rect.height / 2)) / -rect.height;
-    cardRef.current.animate(
-      {
-        transform: `rotateX(${offsetY * 60}deg) rotateY(${offsetX * 60}deg)`,
-      },
-      { duration: 800, fill: "forwards", easing: "ease-in" }
-    );
 
     // Rotate the card based on mouse position
     containerRef.current.onmousemove = (e) => {
       if (cardRef.current === null) {
         return;
       }
+      const rect = containerRef.current.getBoundingClientRect();
       const offsetX = (e.clientX - (rect.left + rect.width / 2)) / rect.width;
       const offsetY = (e.clientY - (rect.top + rect.height / 2)) / -rect.height;
       cardRef.current.animate(
@@ -98,19 +96,8 @@ const Card = ({ track, playTrack, selectTrack, containerRef, background }) => {
     setTrackImage(Helpers.trackGetImage(track));
   }, [track]);
 
-  // Trigger mouseleave event after clicking on a card
-  const resetMusic = () => {
-    if (containerRef.current === null) {
-      return;
-    }
-    containerRef.current.style.pointerEvents = "none";
-    setTimeout(() => {
-      containerRef.current.style.pointerEvents = "auto";
-    }, 100);
-  };
-
   return (
-    <div
+    <button
       className="card-container"
       onMouseEnter={(e) => {
         cardHover(e);
@@ -122,15 +109,17 @@ const Card = ({ track, playTrack, selectTrack, containerRef, background }) => {
           return;
         }
         selectTrack(track);
-        resetMusic();
+        musicReset();
       }}
     >
       <div className="card" ref={cardRef}>
         <img alt={`${trackName} album cover`} src={trackImage} />
-        <span>{trackName}</span>
-        <span>{trackArtist}</span>
+        <div className="card-text">
+          <span>{trackName}</span>
+          <span>{trackArtist}</span>
+        </div>
       </div>
-    </div>
+    </button>
   );
 };
 

@@ -13,3 +13,7 @@ export const trackGetImage = (track) => {
 export const trackGetUri = (track) => {
   return track[0].uri;
 };
+
+export const trackGetPreview = (track) => {
+  return track[0].preview_url;
+};

@@ -3,8 +3,7 @@ import { CLIENT_ID } from "../config";
 
 const redirectURI = "http://localhost:5173";
 const authURL = "https://accounts.spotify.com/authorize?";
-const scope =
-  "user-read-private user-read-email user-top-read user-read-playback-state user-modify-playback-state streaming";
+const scope = "user-read-private user-read-email user-top-read";
 
 // URL to redirect user for authorization
 const url =
