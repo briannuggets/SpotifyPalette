@@ -42,9 +42,8 @@ const Card = ({
           playTrack(Helpers.trackGetPreview(track));
         }, 500)
       );
+      changeBackground();
     }
-
-    changeBackground();
 
     // Rotate the card based on mouse position
     containerRef.current.onmousemove = (e) => {
@@ -98,7 +97,7 @@ const Card = ({
 
   return (
     <button
-      className="card-container"
+      className="card-container hidden"
       onMouseEnter={(e) => {
         cardHover(e);
       }}

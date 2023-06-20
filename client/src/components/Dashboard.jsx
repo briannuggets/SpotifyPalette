@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { CLIENT_ID, CLIENT_SECRET } from "../config.jsx";
 import Card from "./Card";
 import * as Helpers from "../functions/TrackHelper.jsx";
+import { retrieveAnalysis } from "../functions/AnalysisHelper";
+import Results from "./Results";
 
 const spotifyApi = new SpotifyWebApi({
   clientId: CLIENT_ID,
@@ -81,30 +83,20 @@ const Dashboard = ({ code }) => {
   const [secondTrack, setSecondTrack] = useState(null);
   const firstCardRef = useRef();
   const secondCardRef = useRef();
+  const [analysis, setAnalysis] = useState([0, 0, 0, 0, 0]); // [danceability, energy, valence, tempo, complete flag]
   const selectTrack = (track) => {
     // Process the selected track
     if (track !== null) {
-      console.log(Helpers.trackGetName(track));
-      // On the last track, animate the cards off-screen
+      setAnalysis(Helpers.processTrack(track, analysis));
+      // On the last track, animate the cards off-screen before hiding them
       if (currentOrder > trackOrder.length - 1) {
         if (firstCardRef.current !== null || secondCardRef.current !== null) {
-          firstCardRef.current.animate(
-            { transform: "translateX(-100%)" },
-            {
-              duration: 800,
-              fill: "forwards",
-              easing: "cubic-bezier(0.5, 0, 0.75, 0)",
-            }
-          );
-          secondCardRef.current.animate(
-            { transform: "translateX(100%)" },
-            {
-              duration: 800,
-              fill: "forwards",
-              easing: "cubic-bezier(0.5, 0, 0.75, 0)",
-            }
-          );
+          setTimeout(() => {
+            firstCardRef.current.style.display = "none";
+            secondCardRef.current.style.display = "none";
+          }, 400);
         }
+        setAnalysis(Helpers.finalizeAnalysis(analysis));
         return;
       }
     }
@@ -117,6 +109,17 @@ const Dashboard = ({ code }) => {
     setCurrentOrder(currentOrder + 1);
   };
 
+  // Analyze final results
+  const [results, setResults] = useState(null);
+  useEffect(() => {
+    if (analysis[4] === 1) {
+      const compare = [...analysis];
+      compare.pop();
+      const results = retrieveAnalysis(compare);
+      setResults(results);
+    }
+  }, [analysis]);
+
   // Set the first pair of tracks after all tracks have loaded
   useEffect(() => {
     if (loadedTracks) {
@@ -125,33 +128,26 @@ const Dashboard = ({ code }) => {
       if (firstCardRef.current && secondCardRef.current) {
         firstCardRef.current.classList.add("active");
         secondCardRef.current.classList.add("active");
+        musicReset();
       }
     }
   }, [loadedTracks]);
 
   // Play the currently hovered track
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(false);
   const audioRef = useRef();
   const playTrack = (url) => {
     if (audioRef.current === null) {
       return;
     }
     if (url === null) {
-      audioRef.current.pause();
-      setCurrentlyPlaying(false);
+      audioRef.current.volume = 0;
       return;
     }
 
     audioRef.current.volume = 0.3;
-    if (currentlyPlaying) {
-      audioRef.current.pause();
-      audioRef.current.src = url;
-      audioRef.current.play();
-    } else {
-      audioRef.current.src = url;
-      audioRef.current.play();
-      setCurrentlyPlaying(true);
-    }
+    audioRef.current.src = url;
+    audioRef.current.currentTime = 0;
+    audioRef.current.play();
   };
 
   // Trigger mouseleave event on cards to play the next track
@@ -210,7 +206,9 @@ const Dashboard = ({ code }) => {
           background={backgroundImages}
           musicReset={musicReset}
         />
+        <h1 className="prompt">Which do you like better?</h1>
       </div>
+      {results ? <Results results={results} /> : null}
       <audio ref={audioRef} />
     </>
   );
