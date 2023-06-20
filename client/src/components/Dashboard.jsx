@@ -82,15 +82,24 @@ const Dashboard = ({ code }) => {
     // Process the selected track
     if (track !== null) {
       console.log(Helpers.trackGetName(track));
+      // On the last track, animate the cards off-screen
       if (currentOrder > trackOrder.length - 1) {
         if (firstCardRef.current !== null || secondCardRef.current !== null) {
           firstCardRef.current.animate(
-            { transform: "translateX(-100vw)" },
-            { duration: 500, fill: "forwards" }
+            { transform: "translateX(-100%)" },
+            {
+              duration: 800,
+              fill: "forwards",
+              easing: "cubic-bezier(0.5, 0, 0.75, 0)",
+            }
           );
           secondCardRef.current.animate(
-            { transform: "translateX(100vw)" },
-            { duration: 500, fill: "forwards" }
+            { transform: "translateX(100%)" },
+            {
+              duration: 800,
+              fill: "forwards",
+              easing: "cubic-bezier(0.5, 0, 0.75, 0)",
+            }
           );
         }
         return;
@@ -107,6 +116,11 @@ const Dashboard = ({ code }) => {
   useEffect(() => {
     if (loadedTracks === 20) {
       selectTrack(null);
+      // Enable pointer events on the cards
+      if (firstCardRef.current && secondCardRef.current) {
+        firstCardRef.current.classList.add("active");
+        secondCardRef.current.classList.add("active");
+      }
     }
   }, [loadedTracks]);
 
@@ -116,20 +130,34 @@ const Dashboard = ({ code }) => {
     setCurrentlyPlaying(uri);
   };
 
+  const backgroundImages = [useRef(), useRef()];
+
   return (
     <>
+      <img
+        alt="First background image"
+        className="background-image active"
+        ref={backgroundImages[0]}
+      />
+      <img
+        alt="Second background image"
+        className="background-image"
+        ref={backgroundImages[1]}
+      />
       <div id="dashboard">
         <Card
           track={firstTrack}
           playTrack={playTrack}
           selectTrack={selectTrack}
           containerRef={firstCardRef}
+          background={backgroundImages}
         />
         <Card
           track={secondTrack}
           playTrack={playTrack}
           selectTrack={selectTrack}
           containerRef={secondCardRef}
+          background={backgroundImages}
         />
       </div>
       <Player accessToken={accessToken} trackUri={currentlyPlaying} />

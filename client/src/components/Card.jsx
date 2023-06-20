@@ -1,8 +1,24 @@
 import { useRef, useEffect, useState } from "react";
 import * as Helpers from "../functions/TrackHelper.jsx";
 
-const Card = ({ track, playTrack, selectTrack, containerRef }) => {
+const Card = ({ track, playTrack, selectTrack, containerRef, background }) => {
   const [playTimeout, setPlayTimeout] = useState(null);
+
+  const changeBackground = () => {
+    if (background[0].current === null || background[1].current === null) {
+      return;
+    }
+
+    if (background[0].current.classList.contains("active")) {
+      background[1].current.src = Helpers.trackGetImage(track);
+      background[0].current.classList.remove("active");
+      background[1].current.classList.add("active");
+    } else if (background[1].current.classList.contains("active")) {
+      background[0].current.src = Helpers.trackGetImage(track);
+      background[1].current.classList.remove("active");
+      background[0].current.classList.add("active");
+    }
+  };
 
   // Card hover effect
   const cardRef = useRef(null);
@@ -19,6 +35,8 @@ const Card = ({ track, playTrack, selectTrack, containerRef }) => {
         }, 600)
       );
     }
+
+    changeBackground();
 
     // Initial rotation of the card
     const rect = containerRef.current.getBoundingClientRect();
