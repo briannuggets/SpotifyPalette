@@ -52,23 +52,27 @@ const Dashboard = ({ code }) => {
   }, [accessToken]);
 
   // Load the audio features for each of the user's top tracks
-  const [loadedTracks, setLoadedTracks] = useState(0);
+  const [loadedTracks, setLoadedTracks] = useState(false);
   useEffect(() => {
     if (topTracks.length === 0) {
       return;
     }
 
     let _trackMap = {};
+    const trackIds = [];
     for (let i = 0; i < topTracks.length; i++) {
-      spotifyApi
-        .getAudioFeaturesForTrack(topTracks[i].id)
-        .then((data) => {
-          _trackMap[i] = [topTracks[i], data.body];
-        })
-        .then(() => {
-          setLoadedTracks((prevLoadedTracks) => prevLoadedTracks + 1);
-        });
+      trackIds.push(topTracks[i].id);
     }
+    spotifyApi
+      .getAudioFeaturesForTracks(trackIds)
+      .then((data) => {
+        for (let i = 0; i < data.body.audio_features.length; i++) {
+          _trackMap[i] = [topTracks[i], data.body.audio_features[i]];
+        }
+      })
+      .then(() => {
+        setLoadedTracks(true);
+      });
     setTrackMap(_trackMap);
   }, [topTracks]);
 
@@ -115,7 +119,7 @@ const Dashboard = ({ code }) => {
 
   // Set the first pair of tracks after all tracks have loaded
   useEffect(() => {
-    if (loadedTracks === 20) {
+    if (loadedTracks) {
       selectTrack(null);
       // Enable pointer events on the cards
       if (firstCardRef.current && secondCardRef.current) {
