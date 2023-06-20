@@ -1,8 +1,10 @@
 import UseAuth from "./UseAuth";
 import SpotifyWebApi from "spotify-web-api-node";
-import * as Helpers from "../functions/TrackHelper.jsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { CLIENT_ID, CLIENT_SECRET } from "../config.jsx";
+import Card from "./Card";
+import Player from "./Player";
+import * as Helpers from "../functions/TrackHelper.jsx";
 
 const spotifyApi = new SpotifyWebApi({
   clientId: CLIENT_ID,
@@ -12,10 +14,11 @@ const spotifyApi = new SpotifyWebApi({
 
 const Dashboard = ({ code }) => {
   const accessToken = UseAuth(code);
-  const [trackOrder, setTrackOrder] = useState([]);
-  const [currentOrder, setCurrentOrder] = useState(0);
-  const [topTracks, setTopTracks] = useState([]);
-  const [trackMap, setTrackMap] = useState({});
+
+  const [trackOrder, setTrackOrder] = useState([]); // List of track pairs
+  const [currentOrder, setCurrentOrder] = useState(0); // Current track pair
+  const [topTracks, setTopTracks] = useState([]); // User's top tracks
+  const [trackMap, setTrackMap] = useState({}); // Map of track index to track data and audio features
 
   // Create a list of 10 pairs of random numbers between 0 and 19
   // Users will choose between the paired tracks
@@ -32,7 +35,7 @@ const Dashboard = ({ code }) => {
     setTrackOrder(ordering);
   }, []);
 
-  // Get the user's top tracks
+  // Load the user's top tracks
   useEffect(() => {
     if (!accessToken) {
       return;
@@ -49,7 +52,8 @@ const Dashboard = ({ code }) => {
     );
   }, [accessToken]);
 
-  // Get the audio features for each of the user's top tracks
+  // Load the audio features for each of the user's top tracks
+  const [loadedTracks, setLoadedTracks] = useState(0);
   useEffect(() => {
     if (topTracks.length === 0) {
       return;
@@ -57,31 +61,79 @@ const Dashboard = ({ code }) => {
 
     let _trackMap = {};
     for (let i = 0; i < topTracks.length; i++) {
-      spotifyApi.getAudioFeaturesForTrack(topTracks[i].id).then((data) => {
-        _trackMap[i] = [topTracks[i], data.body];
-      });
+      spotifyApi
+        .getAudioFeaturesForTrack(topTracks[i].id)
+        .then((data) => {
+          _trackMap[i] = [topTracks[i], data.body];
+        })
+        .then(() => {
+          setLoadedTracks((prevLoadedTracks) => prevLoadedTracks + 1);
+        });
     }
     setTrackMap(_trackMap);
   }, [topTracks]);
 
-  const clickButton = () => {
-    if (trackMap.length === 0) {
-      return;
-    }
-    if (currentOrder > trackOrder.length - 1) {
-      return;
+  // Track selection and processing
+  const [firstTrack, setFirstTrack] = useState(null);
+  const [secondTrack, setSecondTrack] = useState(null);
+  const firstCardRef = useRef();
+  const secondCardRef = useRef();
+  const selectTrack = (track) => {
+    // Process the selected track
+    if (track !== null) {
+      console.log(Helpers.trackGetName(track));
+      if (currentOrder > trackOrder.length - 1) {
+        if (firstCardRef.current !== null || secondCardRef.current !== null) {
+          firstCardRef.current.animate(
+            { transform: "translateX(-100vw)" },
+            { duration: 500, fill: "forwards" }
+          );
+          secondCardRef.current.animate(
+            { transform: "translateX(100vw)" },
+            { duration: 500, fill: "forwards" }
+          );
+        }
+        return;
+      }
     }
 
-    const track1 = trackMap[trackOrder[currentOrder][0]];
-    const track2 = trackMap[trackOrder[currentOrder][1]];
-    console.log(Helpers.trackGetImage(track1));
+    // Set the next pair of tracks to compare
+    setFirstTrack(trackMap[trackOrder[currentOrder][0]]);
+    setSecondTrack(trackMap[trackOrder[currentOrder][1]]);
     setCurrentOrder(currentOrder + 1);
   };
 
+  // Set the first pair of tracks after all tracks have loaded
+  useEffect(() => {
+    if (loadedTracks === 20) {
+      selectTrack(null);
+    }
+  }, [loadedTracks]);
+
+  // Play the currently hovered track
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const playTrack = (uri) => {
+    setCurrentlyPlaying(uri);
+  };
+
   return (
-    <div id="dashboard">
-      <button onClick={clickButton}>Click me</button>
-    </div>
+    <>
+      <div id="dashboard">
+        <Card
+          track={firstTrack}
+          playTrack={playTrack}
+          selectTrack={selectTrack}
+          containerRef={firstCardRef}
+        />
+        <Card
+          track={secondTrack}
+          playTrack={playTrack}
+          selectTrack={selectTrack}
+          containerRef={secondCardRef}
+        />
+      </div>
+      <Player accessToken={accessToken} trackUri={currentlyPlaying} />
+    </>
   );
 };
 
