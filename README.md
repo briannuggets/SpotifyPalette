@@ -32,9 +32,9 @@ To run the Spotify Palette application locally, follow these steps:
 ![Result screen](https://i.imgur.com/Zt5aoXG.png)
 
 ## Technologies Used
-React
-Spotify Web API
-Axios
+* React
+* Spotify Web API
+* Axios
 
 ## Contact
 If you have any questions, suggestions, or feedback, please feel free to reach out to the repository owner at brianwindev@gmail.com
