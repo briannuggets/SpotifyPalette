@@ -34,6 +34,10 @@ const Card = ({
     if (cardRef.current === null || containerRef.current === null) {
       return;
     }
+    if (window.innerWidth <= 700) {
+      return;
+    }
+
     // Prevent excessive calls to playTrack when switching between cards
     if (track) {
       setPlayTimeout(
@@ -65,6 +69,10 @@ const Card = ({
     if (cardRef.current === null || containerRef.current === null) {
       return;
     }
+    if (window.innerWidth <= 700) {
+      return;
+    }
+
     // Stop playing the track
     if (playTimeout) {
       clearTimeout(playTimeout);
@@ -118,7 +126,7 @@ const Card = ({
       }}
     >
       <div className="card" ref={cardRef}>
-        <img alt={`${trackName} album cover`} src={trackImage} />
+        <img alt={"Loading..."} src={trackImage} />
         <div className="card-text">
           <span>{trackName}</span>
           <span>{trackArtist}</span>

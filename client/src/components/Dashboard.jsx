@@ -161,6 +161,10 @@ const Dashboard = ({ code }) => {
     if (firstCardRef.current === null || secondCardRef.current === null) {
       return;
     }
+    if (window.innerWidth <= 700) {
+      return;
+    }
+
     firstCardRef.current.classList.add("hidden");
     secondCardRef.current.classList.add("hidden");
     setTimeout(() => {
