@@ -86,6 +86,7 @@ const Card = ({
   const [trackName, setTrackName] = useState("");
   const [trackArtist, setTrackArtist] = useState("");
   const [trackImage, setTrackImage] = useState("");
+  const [availablePreview, setAvailablePreview] = useState(true);
   useEffect(() => {
     if (!track) {
       return;
@@ -93,6 +94,11 @@ const Card = ({
     setTrackName(Helpers.trackGetName(track));
     setTrackArtist(Helpers.trackGetArtist(track));
     setTrackImage(Helpers.trackGetImage(track));
+    if (Helpers.trackGetPreview(track) === null) {
+      setAvailablePreview(false);
+    } else {
+      setAvailablePreview(true);
+    }
   }, [track]);
 
   return (
@@ -117,6 +123,11 @@ const Card = ({
           <span>{trackName}</span>
           <span>{trackArtist}</span>
         </div>
+        {!availablePreview ? (
+          <span className="preview-unavailable">
+            &#10005; Audio preview unavailable
+          </span>
+        ) : null}
       </div>
     </button>
   );

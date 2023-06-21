@@ -9,29 +9,13 @@
 
 body {
   font-family: "Poppins", sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
 }
 
 .App {
-  @include flexCenter();
   height: 100vh;
   width: 100vw;
-  a {
-    color: white;
-    background-color: green;
-    font-size: 1.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 3px;
-    text-decoration: none;
-    @include userSelectNone();
-    &:hover {
-      cursor: pointer;
-    }
-    &:active {
-      background-color: lighten(green, 5%);
-    }
-  }
 }
 
 #dashboard {
@@ -40,19 +24,21 @@ body {
   width: 100%;
   backdrop-filter: blur(8px) brightness(0.7);
   -webkit-backdrop-filter: blur(8px) brightness(0.7);
-  overflow: hidden;
   position: relative;
   .prompt {
     @include absoluteCenter();
     color: white;
     font-weight: normal;
     pointer-events: none;
-    transition: 0.4s;
+    transition: 0.8s ease-out;
+    text-align: center;
+    opacity: 0;
+    animation: fade-in 0.5s cubic-bezier(0.5, 1, 0.89, 1) 1.5s forwards;
   }
 }
 
 .App:has(#results) .prompt {
-  opacity: 0;
+  transform: scale(0);
 }
 
 .card-container {
@@ -121,6 +107,12 @@ body {
     border-radius: 5px;
     @include userSelectNone();
   }
+  .preview-unavailable {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.7rem;
+    color: rgba(255, 0, 0, 0.7);
+  }
 }
 
 .card-text {
@@ -149,6 +141,24 @@ body {
 
 #results {
   @include absoluteFill();
+}
+
+#result-links {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  a {
+    color: white;
+    padding: 0.5rem 0.7rem;
+    text-decoration: none;
+    &:hover {
+      cursor: pointer;
+      color: rgb(221, 221, 221);
+    }
+  }
+  a:nth-child(1) {
+    margin-right: 1rem;
+  }
 }
 
 @keyframes fade-in-palette {
@@ -194,10 +204,9 @@ body {
 #description {
   @include absoluteCenter();
   text-align: center;
-  color: rgb(204, 204, 204);
+  color: white;
   opacity: 0;
   animation: fade-in 0.5s cubic-bezier(0.5, 1, 0.89, 1) 1.5s forwards;
-  mix-blend-mode: difference;
   h1 {
     font-size: 2rem;
   }
@@ -206,4 +215,66 @@ body {
     font-size: 1.2rem;
     font-weight: normal;
   }
+}
+
+#login-screen {
+  --hue: 0deg;
+  @include flexCenterColumn();
+  height: 100vh;
+  position: relative;
+  a {
+    margin-top: 1.5rem;
+    color: white;
+    background-color: #1db954;
+    font-size: 1.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 3px;
+    text-decoration: none;
+    @include userSelectNone();
+    @include flexCenter();
+    &:hover {
+      cursor: pointer;
+      background-color: darken(#1db954, 5%);
+    }
+    &:active {
+      background-color: lighten(#1db954, 5%);
+    }
+  }
+  a:nth-child(2) {
+    background-color: transparent;
+    border: 2px solid #1db954;
+    &:hover {
+      background-color: rgba(#1db954, 0.5);
+    }
+  }
+  &::before {
+    @include pseudoFormatTL();
+    background-image: url("./assets/login.jpg");
+    background-size: cover;
+    background-position: 50% 0%;
+    filter: hue-rotate(var(--hue)) brightness(0.5);
+    z-index: -1;
+  }
+  h1,
+  h2 {
+    color: white;
+    font-weight: normal;
+  }
+  h1 {
+    font-size: 4rem;
+  }
+  h2 {
+    font-size: 2rem;
+  }
+  p {
+    position: absolute;
+    color: white;
+    bottom: 1rem;
+    right: 1rem;
+  }
+}
+
+#login-links {
+  display: flex;
+  gap: 1rem;
 }

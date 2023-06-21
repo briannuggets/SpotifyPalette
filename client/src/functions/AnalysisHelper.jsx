@@ -1,4 +1,5 @@
 // Estimates the genre of a song based on its audio features
+// [danceability, energy, valence, tempo, genre]
 const genres = [
   [0.6, 0.6, 0.5, 115, "Pop"],
   [0.3, 0.7, 0.3, 140, "Rock"],

@@ -96,6 +96,12 @@ const Dashboard = ({ code }) => {
             secondCardRef.current.style.display = "none";
           }, 400);
         }
+        if (audioRef.current) {
+          setTimeout(() => {
+            audioRef.current.volume = 0.3;
+            audioRef.current.loop = true;
+          }, 100);
+        }
         setAnalysis(Helpers.finalizeAnalysis(analysis));
         return;
       }
@@ -206,7 +212,11 @@ const Dashboard = ({ code }) => {
           background={backgroundImages}
           musicReset={musicReset}
         />
-        <h1 className="prompt">Which do you like better?</h1>
+        <h1 className="prompt">
+          Which do you prefer?
+          <br />
+          {currentOrder}/{trackOrder.length}
+        </h1>
       </div>
       {results ? <Results results={results} /> : null}
       <audio ref={audioRef} />
