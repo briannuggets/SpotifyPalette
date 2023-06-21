@@ -306,6 +306,12 @@ body {
 }
 
 @media screen and (max-width: 700px) {
+  body {
+    background-color: rgb(38, 38, 38);
+  }
+  .App {
+    height: calc(100vh - 80px);
+  }
   #dashboard {
     padding: 2rem;
     flex-direction: column;
