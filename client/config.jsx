@@ -1,2 +1,0 @@
-export const CLIENT_ID = "Your client ID here!";
-export const CLIENT_SECRET = "Your client secret here!";
